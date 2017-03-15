@@ -453,10 +453,13 @@ angular.module('afkl.lazyImage')
                 var _setImage = function () {
                     if (options.background) {
                         element[0].style.backgroundImage = 'url("' + currentImage +'")';
-                    } else if (!!img) {
+                    } else if (typeof img !== "undefined") {
                         img[0].src = currentImage;
+                    } else {
+                        return
                     }
                 };
+
 
                 // Append image to DOM
                 var _placeImage = function () {
@@ -497,6 +500,15 @@ angular.module('afkl.lazyImage')
                         if (newImage !== currentImage) {
                             // update current url
                             currentImage = newImage;
+                            if ( typeof img !== "undefined" ) {
+                            
+                                if (!options.background && typeof img.one !== "undefined") {
+                                    element.addClass(LOADING);
+                                    img.one('load', _loaded);
+                                    img.one('error', _error);
+                                }
+                            
+                            }
 
                             // TODO: loading state...
 
