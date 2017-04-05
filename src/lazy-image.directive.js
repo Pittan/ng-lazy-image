@@ -198,6 +198,8 @@ angular.module('afkl.lazyImage')
 
                     element.removeClass(LOADING);
 
+                    _eventsOffAfterLoading();
+
                 };
 
                 var _error = function () {
@@ -249,6 +251,21 @@ angular.module('afkl.lazyImage')
                     }, 300);
                 };
 
+                // Remove events after loading
+                var _eventsOffAfterLoading = function() {
+
+                    $timeout.cancel(timeout);
+
+                    angular.element($window).off('resize', _onResize);
+                    angular.element($window).off('scroll', _onViewChangeThrottled);
+
+                    if ($container[0] !== $window) {
+                        $container.off('resize', _onResize);
+                        $container.off('scroll', _onViewChangeThrottled);
+                    }
+
+                    timeout = undefined;
+                };
 
                 // Remove events for total destroy
                 var _eventsOff = function() {

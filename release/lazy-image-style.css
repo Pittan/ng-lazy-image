@@ -36,19 +36,3 @@
 .afkl-img-ratio-3-4 {
 	padding-bottom: 133%;
 }
-
-
-/*Remove and override.*/
-[afkl-lazy-image],
-.afkl-lazy-wrapper,
-.afkl-lazy-wrapper img {
-	opacity: 1 !important;
-	-webkit-transition: none !important;
-	-moz-transition: none !important;
-	-o-transition: none !important;
-	transition: none !important;
-	display: block !important;
-	height: auto !important;
-	visibility: visible !important;
-	padding-bottom: 0 !important;
-}
