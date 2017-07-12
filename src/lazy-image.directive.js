@@ -11,18 +11,9 @@ angular.module('afkl.lazyImage')
             }]
         };
     })
+
     .directive('afklLazyImage', ['$rootScope', '$window', '$timeout', 'afklSrcSetService', '$parse', function ($rootScope, $window, $timeout, srcSetService, $parse) {
         'use strict';
-
-        // Use srcSetService to find out our best available image
-        var bestImage = function (images) {
-            var image = srcSetService.get({srcset: images});
-            var sourceUrl;
-            if (image) {
-                sourceUrl = image.best.src;
-            }
-            return sourceUrl;
-        };
 
         return {
             restrict: 'A',
@@ -146,7 +137,7 @@ angular.module('afkl.lazyImage')
 
                     loaded = true;
                     // What is my best image available
-                    var hasImage = bestImage(images);
+                    var hasImage = images;
 
                     if (hasImage) {
                         // we have to make an image if background is false (default)
@@ -175,7 +166,7 @@ angular.module('afkl.lazyImage')
                 // Check on resize if actually a new image is best fit, if so then apply it
                 var _checkIfNewImage = function () {
                     if (loaded) {
-                        var newImage = bestImage(images);
+                        var newImage = images;
                         
                         if (newImage !== currentImage) {
                             // update current url
@@ -233,34 +224,18 @@ angular.module('afkl.lazyImage')
                         if (shouldLoad) {
 
                             _placeImage();
-
                         }
-
                     }
-
                 };
 
-                var _onViewChangeThrottled = srcSetService.throttle(_onViewChange, 300);
-
-                // EVENT: RESIZE THROTTLED
-                var _onResize = function () {
-                    $timeout.cancel(timeout);
-                    timeout = $timeout(function() {
-                        _checkIfNewImage();
-                        _onViewChange();
-                    }, 300);
-                };
+                var _onViewChangeThrottled = srcSetService.throttle(_onViewChange, 800);
 
                 // Remove events after loading
                 var _eventsOffAfterLoading = function() {
 
                     $timeout.cancel(timeout);
 
-                    angular.element($window).off('resize', _onResize);
-                    angular.element($window).off('scroll', _onViewChangeThrottled);
-
                     if ($container[0] !== $window) {
-                        $container.off('resize', _onResize);
                         $container.off('scroll', _onViewChangeThrottled);
                     }
 
@@ -272,11 +247,7 @@ angular.module('afkl.lazyImage')
 
                     $timeout.cancel(timeout);
 
-                    angular.element($window).off('resize', _onResize);
-                    angular.element($window).off('scroll', _onViewChangeThrottled);
-
                     if ($container[0] !== $window) {
-                        $container.off('resize', _onResize);
                         $container.off('scroll', _onViewChangeThrottled);
                     }
 
@@ -288,17 +259,8 @@ angular.module('afkl.lazyImage')
                     img = timeout = currentImage = undefined;
                 };
 
-                // set events for scrolling and resizing on window
-                // even if container is not window it is important
-                // to cover two cases:
-                //  - when container size is bigger than window's size
-                //  - when container's side is out of initial window border
-                angular.element($window).on('resize', _onResize);
-                angular.element($window).on('scroll', _onViewChangeThrottled);
-
                 // if container is not window, set events for container as well
                 if ($container[0] !== $window) {
-                    $container.on('resize', _onResize);
                     $container.on('scroll', _onViewChangeThrottled);
                 }
 
@@ -315,17 +277,11 @@ angular.module('afkl.lazyImage')
                     _placeImage();
                 }
 
-
-                scope.$on('afkl.lazyImage.destroyed', _onResize);
-
                 // Remove all events when destroy takes place
                 scope.$on('$destroy', function () {
-                    // tell our other kids, i got removed
-                    $rootScope.$broadcast('afkl.lazyImage.destroyed');
                     // remove our events and image
                     return _eventsOff();
                 });
-
                 return _onViewChange();
 
             }
